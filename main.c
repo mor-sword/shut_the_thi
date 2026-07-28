@@ -1,6 +1,6 @@
 #include "course.h"
 
-int main()
+int main(void)
 {
     Course courses[1000];
     int n_courses = 0;
