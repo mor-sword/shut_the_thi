@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "courseResult.h"
 
 CourseResult createCourseResult(Course *course, double marks)
@@ -21,15 +20,4 @@ CourseResult createIncompleteCourseResult(Course *course)
     result.completed = 0;
 
     return result;
-}
-
-void viewCourseResult(CourseResult result)
-{
-    printf("Course: %s\n", result.course->code);
-    printf("Name: %s\n", result.course->name);
-
-    if (result.completed)
-        printf("Marks: %.2f\n", result.marks);
-    else
-        printf("Status: Incomplete\n");
 }
