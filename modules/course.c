@@ -1,28 +1,26 @@
-#include <stdio.h>
-#include <string.h>
-#include "course.h"
+#ifndef COURSE_H
+#define COURSE_H
+
+typedef struct Course
+{
+    char code[16];
+    char name[100];
+    double credit;
+    int semester;
+} Course;
+
+extern const char null_course_code[];
 
 Course createCourse(
-    const char code[],
-    const char name[],
+    char code[],
+    char name[],
     double credit,
-    int semester)
-{
-    Course course;
+    int semester);
 
-    strcpy(course.code, code);
-    strcpy(course.name, name);
-    course.credit = credit;
-    course.semester = semester;
+int countCoursesBeforeNull(
+    Course courses[],
+    int n_courses);
 
-    return course;
-}
+void viewCourse(Course course);
 
-void viewCourse(Course course)
-{
-    printf("%s - %s | Credit: %.1f | Semester: %d\n",
-           course.code,
-           course.name,
-           course.credit,
-           course.semester);
-}
+#endif

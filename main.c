@@ -1,10 +1,12 @@
 #include <stdio.h>
+
 #include "course.h"
 #include "courseResult.h"
 #include "gpa.h"
 
 #define MAX_COURSES 1000
 #define MAX_RESULTS 1000
+#define MAX_SEMESTER_RESULTS 1000
 
 void showMenu(void)
 {
@@ -16,11 +18,14 @@ void showMenu(void)
     printf("6. Edit Course Result\n");
     printf("7. Delete Course Result\n");
     printf("8. View Marksheet\n");
-    printf("9. Exit\n");
+    printf("9. Required GPA Calculator\n");
+    printf("10. Exit\n");
     printf("Enter Choice: ");
 }
 
-void addCourse(Course courses[], int *n_courses)
+void addCourse(
+    Course courses[],
+    int *n_courses)
 {
     if (*n_courses >= MAX_COURSES)
     {
@@ -28,13 +33,13 @@ void addCourse(Course courses[], int *n_courses)
         return;
     }
 
-    char code[20];
+    char code[16];
     char name[100];
     double credit;
     int semester;
 
     printf("Course Code: ");
-    scanf("%19s", code);
+    scanf("%15s", code);
 
     printf("Course Name: ");
     scanf(" %99[^\n]", name);
@@ -49,10 +54,13 @@ void addCourse(Course courses[], int *n_courses)
         createCourse(code, name, credit, semester);
 
     (*n_courses)++;
+
     printf("Course added successfully.\n");
 }
 
-void viewCourses(Course courses[], int n_courses)
+void viewCourses(
+    Course courses[],
+    int n_courses)
 {
     if (n_courses == 0)
     {
@@ -64,19 +72,24 @@ void viewCourses(Course courses[], int n_courses)
 
     for (int i = 0; i < n_courses; i++)
     {
-        printf("%d. ", i + 1);
+        printf("\n%d. \n", i + 1);
         viewCourse(courses[i]);
     }
 }
 
-void editCourse(Course courses[], int n_courses)
+void editCourse(
+    Course courses[],
+    int n_courses)
 {
+    if (n_courses == 0)
+    {
+        printf("No courses available.\n");
+        return;
+    }
+
     int course_no;
 
     viewCourses(courses, n_courses);
-
-    if (n_courses == 0)
-        return;
 
     printf("Course Number: ");
     scanf("%d", &course_no);
@@ -87,13 +100,13 @@ void editCourse(Course courses[], int n_courses)
         return;
     }
 
-    char code[20];
+    char code[16];
     char name[100];
     double credit;
     int semester;
 
     printf("New Course Code: ");
-    scanf("%19s", code);
+    scanf("%15s", code);
 
     printf("New Course Name: ");
     scanf(" %99[^\n]", name);
@@ -116,12 +129,15 @@ void deleteCourse(
     CourseResult results[],
     int *n_results)
 {
+    if (*n_courses == 0)
+    {
+        printf("No courses available.\n");
+        return;
+    }
+
     int course_no;
 
     viewCourses(courses, *n_courses);
-
-    if (*n_courses == 0)
-        return;
 
     printf("Course Number: ");
     scanf("%d", &course_no);
@@ -132,15 +148,17 @@ void deleteCourse(
         return;
     }
 
-    Course *deleted_course = &courses[course_no - 1];
+    Course *deleted =
+        &courses[course_no - 1];
+
     int kept_results = 0;
 
     for (int i = 0; i < *n_results; i++)
     {
-        if (results[i].course == deleted_course)
+        if (results[i].course == deleted)
             continue;
 
-        if (results[i].course > deleted_course)
+        if (results[i].course > deleted)
             results[i].course--;
 
         results[kept_results] = results[i];
@@ -149,14 +167,18 @@ void deleteCourse(
 
     *n_results = kept_results;
 
-    for (int i = course_no - 1; i < *n_courses - 1; i++)
+    for (
+        int i = course_no - 1;
+        i < *n_courses - 1;
+        i++)
     {
         courses[i] = courses[i + 1];
     }
 
     (*n_courses)--;
 
-    printf("Course and linked result deleted successfully.\n");
+    printf(
+        "Course and related result deleted successfully.\n");
 }
 
 void addCourseResult(
@@ -192,11 +214,13 @@ void addCourseResult(
         return;
     }
 
-    Course *course = &courses[course_no - 1];
+    Course *course =
+        &courses[course_no - 1];
 
-    printf("%s: %s Completed?\n",
-           course->code,
-           course->name);
+    printf(
+        "%s: %s Completed?\n",
+        course->code,
+        course->name);
 
     printf("1. YES\n");
     printf("2. NO\n");
@@ -209,15 +233,21 @@ void addCourseResult(
         scanf("%lf", &marks);
 
         results[*n_results] =
-            createCourseResult(course, marks);
+            createCompletedCourseResult(course, marks);
     }
-    else
+    else if (completed == 2)
     {
         results[*n_results] =
             createIncompleteCourseResult(course);
     }
+    else
+    {
+        printf("Invalid choice.\n");
+        return;
+    }
 
     (*n_results)++;
+
     printf("Course result added successfully.\n");
 }
 
@@ -239,7 +269,7 @@ void editCourseResult(
 
     for (int i = 0; i < n_results; i++)
     {
-        printf("%d. ", i + 1);
+        printf("\n%d. \n", i + 1);
         viewCourseResult(results[i]);
     }
 
@@ -252,11 +282,13 @@ void editCourseResult(
         return;
     }
 
-    Course *course = results[result_no - 1].course;
+    Course *course =
+        results[result_no - 1].course;
 
-    printf("%s: %s Completed?\n",
-           course->code,
-           course->name);
+    printf(
+        "%s: %s Completed?\n",
+        course->code,
+        course->name);
 
     printf("1. YES\n");
     printf("2. NO\n");
@@ -269,12 +301,17 @@ void editCourseResult(
         scanf("%lf", &marks);
 
         results[result_no - 1] =
-            createCourseResult(course, marks);
+            createCompletedCourseResult(course, marks);
     }
-    else
+    else if (completed == 2)
     {
         results[result_no - 1] =
             createIncompleteCourseResult(course);
+    }
+    else
+    {
+        printf("Invalid choice.\n");
+        return;
     }
 
     printf("Course result updated successfully.\n");
@@ -292,11 +329,9 @@ void deleteCourseResult(
 
     int result_no;
 
-    printf("\nCourse Results\n");
-
     for (int i = 0; i < *n_results; i++)
     {
-        printf("%d. ", i + 1);
+        printf("\n%d. \n", i + 1);
         viewCourseResult(results[i]);
     }
 
@@ -309,7 +344,10 @@ void deleteCourseResult(
         return;
     }
 
-    for (int i = result_no - 1; i < *n_results - 1; i++)
+    for (
+        int i = result_no - 1;
+        i < *n_results - 1;
+        i++)
     {
         results[i] = results[i + 1];
     }
@@ -329,42 +367,142 @@ void viewMarksheet(
         return;
     }
 
+    sortCourseResultsBySemester(results, n_results);
+
     printf("\nMarksheet\n");
 
     for (int i = 0; i < n_results; i++)
     {
-        printf("%d. ", i + 1);
+        printf("\n%d. \n", i + 1);
         viewCourseResult(results[i]);
+
+        if (results[i].completed)
+        {
+            printf(
+                "Grade: %s\n",
+                getLetterGrade(results[i]));
+        }
+        else
+        {
+            printf("Grade: I\n");
+        }
     }
 
-    printf("\n");
+    printf("\nSemester GPAs\n");
 
     for (int semester = 1; semester <= 8; semester++)
     {
-        int found = 0;
+        CourseResult semester_results[MAX_SEMESTER_RESULTS];
 
-        for (int i = 0; i < n_results; i++)
+        filterCourseResultsBySemester(
+            results,
+            n_results,
+            semester,
+            semester_results);
+
+        int count =
+            countCourseResultsBeforeNull(
+                semester_results,
+                MAX_SEMESTER_RESULTS);
+
+        if (count > 0)
         {
-            if (results[i].course->semester == semester)
-            {
-                found = 1;
-                break;
-            }
-        }
-
-        if (found)
-        {
-            viewSemesterResults(
-                results,
-                n_results,
-                semester);
-
-            printf("\n");
+            printf(
+                "Semester %d GPA: %.2f\n",
+                semester,
+                calculateGPA(semester_results, count));
         }
     }
 
-    printf("Overall CGPA: %.2f\n",
-           calculateCGPA(results, n_results));
+    printf(
+        "Overall CGPA: %.2f\n",
+        calculateGPA(results, n_results));
+}
+
+void requiredGPACalculator(
+    CourseResult results[],
+    int n_results)
+{
+    if (n_results == 0)
+    {
+        printf("No course results available.\n");
+        return;
+    }
+
+    double completed_credits = 0.0;
+    double remaining_credits = 0.0;
+
+    for (int i = 0; i < n_results; i++)
+    {
+        if (results[i].completed)
+        {
+            completed_credits +=
+                results[i].course->credit;
+        }
+        else
+        {
+            remaining_credits +=
+                results[i].course->credit;
+        }
+    }
+
+    if (completed_credits <= 0.0)
+    {
+        printf("No completed course results available.\n");
+        return;
+    }
+
+    if (remaining_credits <= 0.0)
+    {
+        printf("No incomplete courses available.\n");
+        return;
+    }
+
+    double current_cgpa =
+        calculateGPA(results, n_results);
+
+    double target_cgpa;
+
+    printf("Current CGPA: %.2f\n", current_cgpa);
+    printf(
+        "Completed credits: %.2f\n",
+        completed_credits);
+    printf(
+        "Remaining credits: %.2f\n",
+        remaining_credits);
+
+    printf("Target CGPA: ");
+    scanf("%lf", &target_cgpa);
+
+    if (target_cgpa < 0.0 || target_cgpa > 4.0)
+    {
+        printf(
+            "Target CGPA must be between 0.00 and 4.00.\n");
+        return;
+    }
+
+    double required =
+        calculateRequiredGPA(
+            current_cgpa,
+            completed_credits,
+            target_cgpa,
+            remaining_credits);
+
+    if (required > 4.0)
+    {
+        printf(
+            "The target CGPA is not achievable with "
+            "the remaining credits.\n");
+    }
+    else if (required <= 0.0)
+    {
+        printf(
+            "You have already achieved the target CGPA.\n");
+    }
+    else
+    {
+        printf("Required GPA: %.2f\n", required);
+    }
 }
 
 int main(void)
@@ -376,10 +514,15 @@ int main(void)
     int n_results = 0;
     int choice = 0;
 
-    while (choice != 9)
+    while (choice != 10)
     {
         showMenu();
-        scanf("%d", &choice);
+
+        if (scanf("%d", &choice) != 1)
+        {
+            printf("Invalid input.\n");
+            return 1;
+        }
 
         if (choice == 1)
         {
@@ -421,11 +564,17 @@ int main(void)
         {
             viewMarksheet(results, n_results);
         }
-        else if (choice != 9)
+        else if (choice == 9)
+        {
+            requiredGPACalculator(results, n_results);
+        }
+        else if (choice != 10)
         {
             printf("Invalid choice.\n");
         }
     }
+
+    printf("Program exited.\n");
 
     return 0;
 }

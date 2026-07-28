@@ -1,7 +1,18 @@
 #include <stdio.h>
+#include <string.h>
+
 #include "courseResult.h"
 
-CourseResult createCourseResult(Course *course, double marks)
+Course nullCourse =
+    {
+        "NULL",
+        "NULL",
+        0.0,
+        0};
+
+CourseResult createCompletedCourseResult(
+    Course *course,
+    double marks)
 {
     CourseResult result;
 
@@ -12,7 +23,8 @@ CourseResult createCourseResult(Course *course, double marks)
     return result;
 }
 
-CourseResult createIncompleteCourseResult(Course *course)
+CourseResult createIncompleteCourseResult(
+    Course *course)
 {
     CourseResult result;
 
@@ -23,13 +35,130 @@ CourseResult createIncompleteCourseResult(Course *course)
     return result;
 }
 
+void sortCourseResultsBySemester(
+    CourseResult results[],
+    int n_results)
+{
+    for (int i = 0; i < n_results - 1; i++)
+    {
+        int selected = i;
+
+        for (int j = i + 1; j < n_results; j++)
+        {
+            if (
+                results[j].course->semester <
+                results[selected].course->semester)
+            {
+                selected = j;
+            }
+        }
+
+        if (selected != i)
+        {
+            CourseResult temporary = results[i];
+            results[i] = results[selected];
+            results[selected] = temporary;
+        }
+    }
+}
+
+int lowerBound(
+    CourseResult results[],
+    int n_results,
+    int semester)
+{
+    int left = 0;
+    int right = n_results - 1;
+
+    while (left <= right)
+    {
+        int middle = (left + right) / 2;
+
+        if (results[middle].course->semester >= semester)
+            right = middle - 1;
+        else
+            left = middle + 1;
+    }
+
+    return left;
+}
+
+int upperBound(
+    CourseResult results[],
+    int n_results,
+    int semester)
+{
+    int left = 0;
+    int right = n_results - 1;
+
+    while (left <= right)
+    {
+        int middle = (left + right) / 2;
+
+        if (results[middle].course->semester > semester)
+            right = middle - 1;
+        else
+            left = middle + 1;
+    }
+
+    return left;
+}
+
+void filterCourseResultsBySemester(
+    CourseResult results[],
+    int n_results,
+    int semester,
+    CourseResult filtered[])
+{
+    int start = lowerBound(results, n_results, semester);
+    int finish = upperBound(results, n_results, semester);
+    int count = 0;
+
+    for (int i = start; i < finish; i++)
+    {
+        filtered[count] = results[i];
+        count++;
+    }
+
+    filtered[count] =
+        createIncompleteCourseResult(&nullCourse);
+}
+
+int countCourseResultsBeforeNull(
+    CourseResult results[],
+    int n_results)
+{
+    int count = 0;
+
+    while (count < n_results)
+    {
+        if (
+            strcmp(
+                results[count].course->code,
+                "NULL") == 0)
+        {
+            return count;
+        }
+
+        count++;
+    }
+
+    return count;
+}
+
 void viewCourseResult(CourseResult result)
 {
-    printf("Course: %s\n", result.course->code);
-    printf("Name: %s\n", result.course->name);
+    printf(
+        "%s: %s\t\t[Credit: %.1f]\n",
+        result.course->code,
+        result.course->name,
+        result.course->credit);
 
-    if (result.completed)
-        printf("Marks: %.2f\n", result.marks);
-    else
-        printf("Status: Incomplete\n");
+    if (!result.completed)
+    {
+        printf("Incomplete\n");
+        return;
+    }
+
+    printf("Marks: %.2f\n", result.marks);
 }

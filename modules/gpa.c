@@ -1,107 +1,129 @@
-#include <stdio.h>
 #include "gpa.h"
 
-char getLetterGrade(double marks)
-{
-    if (marks >= 80)
-        return 'A';
-    if (marks >= 75)
-        return 'B';
-    if (marks >= 70)
-        return 'C';
-    if (marks >= 65)
-        return 'D';
-    if (marks >= 60)
-        return 'E';
-    return 'F';
-}
-
-double getGradePoint(double marks)
-{
-    if (marks >= 80)
-        return 4.00;
-    if (marks >= 75)
-        return 3.75;
-    if (marks >= 70)
-        return 3.50;
-    if (marks >= 65)
-        return 3.25;
-    if (marks >= 60)
-        return 3.00;
-    return 0.00;
-}
-
-double calculateCGPA(CourseResult results[], int count)
-{
-    double totalPoints = 0.0;
-    double totalCredits = 0.0;
-
-    for (int i = 0; i < count; i++)
+const double gradeBoundaries[] =
     {
-        if (!results[i].completed)
-            continue;
+        80.0,
+        75.0,
+        70.0,
+        65.0,
+        60.0,
+        55.0,
+        50.0,
+        45.0,
+        40.0};
 
-        totalPoints += getGradePoint(results[i].marks) * results[i].course->credit;
+const double gradePoints[] =
+    {
+        4.00,
+        3.75,
+        3.50,
+        3.25,
+        3.00,
+        2.75,
+        2.50,
+        2.25,
+        2.00};
 
-        totalCredits += results[i].course->credit;
-    }
+const char *gradeLetters[] =
+    {
+        "A+",
+        "A",
+        "A-",
+        "B+",
+        "B",
+        "B-",
+        "C+",
+        "C",
+        "D"};
 
-    if (totalCredits == 0.0)
+double getPercentage(CourseResult result)
+{
+    double full_marks =
+        result.course->credit * 100.0;
+
+    if (full_marks <= 0.0)
         return 0.0;
 
-    return totalPoints / totalCredits;
+    return (result.marks / full_marks) * 100.0;
 }
 
-double calculateSemesterGPA(
-    CourseResult results[],
-    int count,
-    int semester)
+double getGradePoint(CourseResult result)
 {
-    double totalPoints = 0.0;
-    double totalCredits = 0.0;
-
-    for (int i = 0; i < count; i++)
-    {
-        if (!results[i].completed)
-            continue;
-
-        if (results[i].course->semester != semester)
-            continue;
-
-        totalPoints += getGradePoint(results[i].marks) * results[i].course->credit;
-
-        totalCredits += results[i].course->credit;
-    }
-
-    if (totalCredits == 0.0)
+    if (!result.completed)
         return 0.0;
 
-    return totalPoints / totalCredits;
+    double percentage =
+        getPercentage(result);
+
+    for (int i = 0; i < 9; i++)
+    {
+        if (percentage >= gradeBoundaries[i])
+            return gradePoints[i];
+    }
+
+    return 0.0;
 }
 
-void viewSemesterResults(
-    CourseResult results[],
-    int count,
-    int semester)
+char *getLetterGrade(CourseResult result)
 {
-    printf("Semester %d Results\n", semester);
+    if (!result.completed)
+        return "I";
 
-    for (int i = 0; i < count; i++)
+    double percentage =
+        getPercentage(result);
+
+    for (int i = 0; i < 9; i++)
+    {
+        if (percentage >= gradeBoundaries[i])
+            return (char *)gradeLetters[i];
+    }
+
+    return "F";
+}
+
+double calculateGPA(
+    CourseResult results[],
+    int n_results)
+{
+    double weighted_points = 0.0;
+    double total_credits = 0.0;
+
+    for (int i = 0; i < n_results; i++)
     {
         if (!results[i].completed)
             continue;
 
-        if (results[i].course->semester != semester)
-            continue;
+        weighted_points +=
+            getGradePoint(results[i]) *
+            results[i].course->credit;
 
-        printf("Course: %s\n", results[i].course->code);
-        printf("Name: %s\n", results[i].course->name);
-        printf("Marks: %.2f\n", results[i].marks);
-        printf("Grade: %c\n", getLetterGrade(results[i].marks));
-        printf("Grade Point: %.2f\n\n",
-               getGradePoint(results[i].marks));
+        total_credits +=
+            results[i].course->credit;
     }
 
-    printf("Semester GPA: %.2f\n",
-           calculateSemesterGPA(results, count, semester));
+    if (total_credits <= 0.0)
+        return 0.0;
+
+    return weighted_points / total_credits;
+}
+
+double calculateRequiredGPA(
+    double current_cgpa,
+    double completed_credits,
+    double target_cgpa,
+    double remaining_credits)
+{
+    if (remaining_credits <= 0.0)
+        return 0.0;
+
+    double total_credits =
+        completed_credits + remaining_credits;
+
+    double current_points =
+        current_cgpa * completed_credits;
+
+    double target_points =
+        target_cgpa * total_credits;
+
+    return (target_points - current_points) / remaining_credits;
 }

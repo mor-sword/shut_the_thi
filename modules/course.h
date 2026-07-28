@@ -3,17 +3,23 @@
 
 typedef struct Course
 {
-    char code[20];
+    char code[16];
     char name[100];
     double credit;
     int semester;
 } Course;
 
+extern const char null_course_code[];
+
 Course createCourse(
-    const char code[],
-    const char name[],
+    char code[],
+    char name[],
     double credit,
     int semester);
+
+int countCoursesBeforeNull(
+    Course courses[],
+    int n_courses);
 
 void viewCourse(Course course);
 
