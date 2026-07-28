@@ -13,5 +13,10 @@ void viewSemesterResults(
     CourseResult results[],
     int count,
     int semester);
+double calculateRequiredGPA(
+    double current_cgpa,
+    double completed_credits,
+    double target_cgpa,
+    double remaining_credits);
 
 #endif
