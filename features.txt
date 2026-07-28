@@ -1,0 +1,10 @@
+001 - Prepare course module
+002 - Prepare course results module
+003 - Add CGPA calculator
+004 - Add incomplete course support
+005 - Add semester support
+006 - Add interactive menu
+007 - Calculate required GPA
+008 - Calculate expected CGPA
+009 - Add multiple students
+010 - Rank students
