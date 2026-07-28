@@ -1,5 +1,5 @@
 
-002 - Prepare course results module
+
 003 - Add CGPA calculator
 004 - Add incomplete course support
 005 - Add semester support
