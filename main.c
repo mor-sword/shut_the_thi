@@ -7,10 +7,29 @@ int main(void)
 {
     Course courses[4];
 
-    courses[0] = createCourse("CSE 4107", "Structured Programming I", 3.0);
-    courses[1] = createCourse("CSE 4108", "Structured Programming I Lab", 1.5);
-    courses[2] = createCourse("CSE 4203", "Discrete Mathematics", 3.0);
-    courses[3] = createCourse("CSE 4204", "Discrete Mathematics Lab", 1.5);
+    courses[0] = createCourse(
+        "CSE 4107",
+        "Structured Programming I",
+        3.0,
+        1);
+
+    courses[1] = createCourse(
+        "CSE 4108",
+        "Structured Programming I Lab",
+        1.5,
+        1);
+
+    courses[2] = createCourse(
+        "CSE 4203",
+        "Discrete Mathematics",
+        3.0,
+        2);
+
+    courses[3] = createCourse(
+        "CSE 4204",
+        "Discrete Mathematics Lab",
+        1.5,
+        2);
 
     CourseResult results[4];
 
@@ -19,20 +38,14 @@ int main(void)
     results[2] = createCourseResult(&courses[2], 78.5);
     results[3] = createIncompleteCourseResult(&courses[3]);
 
-    for (int i = 0; i < 4; i++)
-    {
-        viewCourseResult(results[i]);
+    viewSemesterResults(results, 4, 1);
+    printf("\n");
 
-        if (results[i].completed)
-        {
-            printf("Grade: %c\n", getLetterGrade(results[i].marks));
-            printf("Grade Point: %.2f\n", getGradePoint(results[i].marks));
-        }
+    viewSemesterResults(results, 4, 2);
+    printf("\n");
 
-        printf("\n");
-    }
-
-    printf("CGPA: %.2f\n", calculateCGPA(results, 4));
+    printf("Overall CGPA: %.2f\n",
+           calculateCGPA(results, 4));
 
     return 0;
 }
